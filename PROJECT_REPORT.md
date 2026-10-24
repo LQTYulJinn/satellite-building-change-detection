@@ -51,13 +51,15 @@ Gọi TP là pixel thay đổi dự đoán đúng; FP là pixel bị báo thay �
 
 ## 6. Kết quả
 
-Kết quả định lượng **chưa có** cho đến khi tải LEVIR-CD và chạy huấn luyện. Không điền số từ bài báo của người khác vào bảng của project. Sau khi chạy `summarize.py`, dùng `runs/results.md` làm nguồn số liệu và đưa hình thật từ `runs/<model>/test/examples/` vào README hoặc portfolio.
+Kết quả dưới đây là từ notebook Kaggle của project, chạy early-fusion U-Net 30 epoch trên LEVIR-CD và chọn ngưỡng trên validation. Output đã được khôi phục từ file notebook tải xuống sau khi phiên nháp khởi động lại. File gốc `best.pt` và toàn bộ `per_tile.csv` không còn; xem dữ liệu khôi phục trong [`recovered_results/`](recovered_results/). Không dùng số từ bài báo của người khác.
 
 | Phương pháp | IoU test | F1 test | Precision | Recall | Thời gian huấn luyện |
 |---|---:|---:|---:|---:|---:|
-| RGB difference | chờ chạy | chờ chạy | chờ chạy | chờ chạy | không huấn luyện |
-| Early fusion U-Net | chờ chạy | chờ chạy | chờ chạy | chờ chạy | chờ chạy |
-| Siamese U-Net | chờ chạy | chờ chạy | chờ chạy | chờ chạy | chờ chạy |
+| RGB difference | 0,0700 | 0,1308 | 0,1040 | 0,1760 | không huấn luyện |
+| Early fusion U-Net | 0,5834 | 0,7369 | 0,7454 | 0,7286 | 206 phút |
+| Siamese U-Net | chưa chạy | chưa chạy | chưa chạy | chưa chạy | chưa chạy |
+
+Checkpoint tốt nhất của early-fusion được chọn ở epoch 27. Ngưỡng 0,45 được chọn trên validation. Test có TP = 4.981.886, FP = 1.701.469, FN = 1.855.518; điểm là micro average theo pixel. Baseline RGB difference dùng ngưỡng 0,40 chọn trên validation. Dữ liệu Kaggle mirror có một số ít pixel nhãn xám trung gian; `audit_data.py` ghi nhận số lượng và `data.py` nhị phân hóa ở ngưỡng 127.
 
 ## 7. Giới hạn và đạo đức sử dụng
 
@@ -70,11 +72,11 @@ Kết quả định lượng **chưa có** cho đến khi tải LEVIR-CD và ch�
 
 ## 8. Cách trình bày trên CV và khi phỏng vấn
 
-Chỉ dùng bullet có số sau khi chạy thật:
+Bullet CV phù hợp với kết quả đã chạy:
 
-> Built a reproducible satellite building change detection pipeline on LEVIR-CD, comparing an RGB-difference baseline with early-fusion and Siamese U-Nets; achieved **[test F1]** F1 and **[test IoU]** IoU with validation-only threshold selection and pixel-level error analysis.
+> Built an early-fusion U-Net for LEVIR-CD building change detection; achieved **0.737 test F1** and **0.583 test IoU** versus a **0.131 F1** RGB-difference baseline, using validation-only threshold selection and pixel-level error analysis.
 
-Nếu chưa chạy đủ, mô tả ở thì hiện tại và không ghi điểm số:
+Không ghi đã so sánh Siamese U-Net khi thí nghiệm đó chưa chạy. Checkpoint cần được lưu lại nếu muốn demo inference hoặc tái lập đúng trọng số mô hình đã báo cáo.
 
 > Developing a LEVIR-CD building change detection benchmark with paired-image U-Nets, split-leakage checks, IoU/F1 evaluation, and visual false-positive/false-negative analysis.
 
