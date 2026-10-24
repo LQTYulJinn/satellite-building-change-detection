@@ -37,9 +37,9 @@ def audit_split(root, split):
                 raise ValueError(f"Label size mismatch: {split}/{name}")
             mask = np.asarray(image.convert("L"))
         levels = set(np.unique(mask).tolist())
-        if not levels.issubset({0, 1, 255}):
-            raise ValueError(f"Label must be binary 0/1 or 0/255: {split}/{name}, levels={sorted(levels)[:10]}")
-        changed += int((mask > 0).sum())
+        if not levels.issubset({0, 1, 254, 255}):
+            raise ValueError(f"Label must use near-binary 0/1 or 0/254/255 values: {split}/{name}, levels={sorted(levels)[:10]}")
+        changed += int(((mask > 127) if mask.max() > 1 else (mask > 0)).sum())
         total += mask.size
         hashes.add((image_hash(paths["A"][name]), image_hash(paths["B"][name])))
     return {"images": len(names), "pixels": total, "changed_pixels": changed,

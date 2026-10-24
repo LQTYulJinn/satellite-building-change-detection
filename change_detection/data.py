@@ -49,7 +49,8 @@ class LevirDataset(Dataset):
         with Image.open(b_path) as image:
             b = np.asarray(image.convert("RGB").crop(box), dtype=np.float32) / 255.0
         with Image.open(label_path) as image:
-            mask = np.asarray(image.convert("L").crop(box), dtype=np.uint8) > 0
+            raw_mask = np.asarray(image.convert("L").crop(box), dtype=np.uint8)
+            mask = (raw_mask > 127) if raw_mask.max() > 1 else (raw_mask > 0)
 
         if self.augment:
             if torch.rand(()) < 0.5:

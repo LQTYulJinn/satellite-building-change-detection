@@ -36,6 +36,13 @@ class AuditDataTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 audit_split(root, "train")
 
+    def test_accepts_near_white_label_value(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_triplet(root, "train", "sample", mask_value=254)
+            report, _, _ = audit_split(root, "train")
+            self.assertEqual(report["changed_pixels"], 16)
+
 
 if __name__ == "__main__":
     unittest.main()
