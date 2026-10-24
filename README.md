@@ -10,6 +10,8 @@ Project dùng **LEVIR-CD** để tìm vùng công trình thay đổi giữa ản
 
 Đọc [PROJECT_REPORT.md](PROJECT_REPORT.md) để xem câu hỏi nghiên cứu, lý do chọn dữ liệu/mô hình/loss, công thức và ý nghĩa các độ đo, thiết kế thí nghiệm, giới hạn và cách mô tả trung thực trên CV. **Trạng thái:** pipeline đã viết; chưa có dữ liệu và checkpoint huấn luyện trong workspace, nên chưa có kết quả thật.
 
+Nếu máy không có GPU, xem [KAGGLE_RUN.md](KAGGLE_RUN.md) để chạy thí nghiệm trên Kaggle. Project hiện dùng **ảnh RGB hai thời điểm**, chưa xử lý Sentinel/Landsat đa phổ hoặc georeferencing; các năng lực đó không nên ghi vào CV cho project này.
+
 ## 1. Chuẩn bị
 
 Cần Python 3.10+ và nên có GPU NVIDIA để huấn luyện nhanh. Trên Windows có `uv`, cài trong PowerShell:

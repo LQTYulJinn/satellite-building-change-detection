@@ -62,6 +62,7 @@ Kết quả định lượng **chưa có** cho đến khi tải LEVIR-CD và ch�
 ## 7. Giới hạn và đạo đức sử dụng
 
 - LEVIR-CD tập trung vào một số khu vực Texas, nên cần dữ liệu ngoài miền để đánh giá khả năng dùng ở Việt Nam hoặc khu vực khác.
+- Đây là bài toán trên ảnh **RGB độ phân giải cao**. Pipeline chưa đọc kênh đa phổ Sentinel/Landsat, chưa gắn tọa độ địa lý hoặc xuất GeoTIFF; không nên mô tả project như một hệ thống phân tích viễn thám đa phổ/địa không gian đầy đủ.
 - Nhãn nhị phân không phân biệt công trình xây mới với công trình bị phá dỡ. Muốn dự đoán hướng thay đổi cần nhãn hoặc quy trình khác.
 - Patch không chồng lấp làm mất ngữ cảnh ở rìa; suy luận ảnh lớn ngoài benchmark nên dùng sliding window có overlap hoặc padding.
 - IoU/F1 theo pixel chưa phản ánh đầy đủ việc phát hiện từng công trình. Nếu ứng dụng cần đếm công trình, nên bổ sung đánh giá theo đối tượng.
