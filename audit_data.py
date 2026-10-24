@@ -24,7 +24,7 @@ def audit_split(root, split):
     names = set(paths["A"])
     if not names or any(set(paths[part]) != names for part in ("B", "label")):
         raise ValueError(f"Missing or unmatched A/B/label PNG files in {folder}")
-    changed = total = 0
+    changed = total = intermediate = 0
     hashes = set()
     for name in sorted(names):
         with Image.open(paths["A"][name]) as image:
@@ -36,13 +36,12 @@ def audit_split(root, split):
             if image.size != size:
                 raise ValueError(f"Label size mismatch: {split}/{name}")
             mask = np.asarray(image.convert("L"))
-        levels = set(np.unique(mask).tolist())
-        if not levels.issubset({0, 1, 254, 255}):
-            raise ValueError(f"Label must use near-binary 0/1 or 0/254/255 values: {split}/{name}, levels={sorted(levels)[:10]}")
+        intermediate += int(((mask > 1) & (mask < 255)).sum())
         changed += int(((mask > 127) if mask.max() > 1 else (mask > 0)).sum())
         total += mask.size
         hashes.add((image_hash(paths["A"][name]), image_hash(paths["B"][name])))
     return {"images": len(names), "pixels": total, "changed_pixels": changed,
+            "intermediate_gray_pixels": intermediate,
             "change_prevalence": changed / total}, names, hashes
 
 

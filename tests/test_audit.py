@@ -43,6 +43,14 @@ class AuditDataTests(unittest.TestCase):
             report, _, _ = audit_split(root, "train")
             self.assertEqual(report["changed_pixels"], 16)
 
+    def test_reports_intermediate_gray_label_value(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_triplet(root, "train", "sample", mask_value=156)
+            report, _, _ = audit_split(root, "train")
+            self.assertEqual(report["changed_pixels"], 16)
+            self.assertEqual(report["intermediate_gray_pixels"], 16)
+
 
 if __name__ == "__main__":
     unittest.main()
