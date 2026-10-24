@@ -1,0 +1,26 @@
+{
+  "split": "test",
+  "architecture": "early",
+  "checkpoint_epoch": 29,
+  "threshold": 0.3,
+  "threshold_source": "validation F1 search (0.10 to 0.90, step 0.05)",
+  "validation_at_selected_threshold": {
+    "iou": 0.5955376223970613,
+    "f1": 0.7465040172507538,
+    "precision": 0.7569082026865993,
+    "recall": 0.7363819778515397,
+    "tp": 2073849,
+    "fp": 666046,
+    "fn": 742419
+  },
+  "metrics": {
+    "iou": 0.5950582240763826,
+    "f1": 0.7461272762264847,
+    "precision": 0.7784120804249284,
+    "recall": 0.7164138611671915,
+    "tp": 4898411,
+    "fp": 1394414,
+    "fn": 1938993
+  },
+  "tiles": 2048
+}

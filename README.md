@@ -8,7 +8,7 @@ Project dùng **LEVIR-CD** để tìm vùng công trình thay đổi giữa ản
 
 Đầu ra là mask nhị phân. Báo cáo IoU, F1, precision và recall của lớp **thay đổi**, cộng hình trước/sau/nhãn/dự đoán/lỗi.
 
-Đọc [PROJECT_REPORT.md](PROJECT_REPORT.md) để xem câu hỏi nghiên cứu, lý do chọn dữ liệu/mô hình/loss, công thức và ý nghĩa các độ đo, thiết kế thí nghiệm, giới hạn và cách mô tả trung thực trên CV. **Trạng thái:** early-fusion U-Net đã chạy 30 epoch trên Kaggle GPU và có kết quả test thật; checkpoint không được lưu sau khi phiên Kaggle nháp khởi động lại. Kết quả khôi phục từ output notebook nằm trong [`recovered_results/`](recovered_results/).
+Đọc [PROJECT_REPORT.md](PROJECT_REPORT.md) để xem câu hỏi nghiên cứu, lý do chọn dữ liệu/mô hình/loss, công thức và ý nghĩa các độ đo, thiết kế thí nghiệm, giới hạn và cách mô tả trung thực trên CV. **Trạng thái:** early-fusion U-Net đã chạy hai lần 30 epoch trên Kaggle GPU. Lần 2 có kết quả test thật, `per_tile.csv`, hình so sánh và checkpoint trong ZIP mà người dùng đã tải về. Metadata và hình lần 2 nằm trong [`results/early_run_2/`](results/early_run_2/); [lần 1](recovered_results/) được giữ để đối chiếu. Xem [kế hoạch cải thiện](IMPROVEMENT_PLAN.md).
 
 Nếu máy không có GPU, xem [KAGGLE_RUN.md](KAGGLE_RUN.md) để chạy thí nghiệm trên Kaggle. Project hiện dùng **ảnh RGB hai thời điểm**, chưa xử lý Sentinel/Landsat đa phổ hoặc georeferencing; các năng lực đó không nên ghi vào CV cho project này.
 
@@ -79,11 +79,12 @@ python summarize.py
 | Phương pháp | IoU test | F1 test | Precision | Recall |
 |---|---:|---:|---:|---:|
 | RGB difference | 0.0700 | 0.1308 | 0.1040 | 0.1760 |
-| Early fusion U-Net | 0.5834 | 0.7369 | 0.7454 | 0.7286 |
+| Early fusion U-Net, lần 1 | 0.5834 | 0.7369 | 0.7454 | 0.7286 |
+| Early fusion U-Net, lần 2 | 0.5951 | 0.7461 | 0.7784 | 0.7164 |
 | Siamese U-Net | chưa chạy | chưa chạy | chưa chạy | chưa chạy |
 
-Xem [hình so sánh thật](recovered_results/comparison_1.png) và các hình còn lại trong `recovered_results/`. Trong hình lỗi: xanh lá = dự đoán đúng vùng thay đổi, đỏ = báo thay đổi sai, xanh dương = bỏ sót. Ngưỡng được chọn trên validation, không chọn trên test. Các số trên khôi phục từ output của notebook Kaggle đã chạy, xem `recovered_results/test_metrics.json` và `recovered_results/baseline.json`.
+Xem [hình so sánh lần 2](results/early_run_2/examples/test_82_512_512.png) và các hình còn lại trong `results/early_run_2/examples/`. Trong hình lỗi: xanh lá = dự đoán đúng vùng thay đổi, đỏ = báo thay đổi sai, xanh dương = bỏ sót. Ngưỡng được chọn trên validation, không chọn trên test. Hai lần dùng cùng cấu hình chính; chênh lệch điểm **không phải bằng chứng về một cải tiến mô hình**. Số chi tiết nằm trong [`metrics.json`](results/early_run_2/metrics.json) và [`per_tile.csv`](results/early_run_2/per_tile.csv).
 
 ## Giới hạn hiện tại
 
-Pipeline giả định ảnh A/B đã căn chỉnh, có cùng kích thước, định dạng PNG, và chỉ đánh giá các patch hoàn chỉnh. Mã chưa tải dữ liệu tự động vì bản LEVIR-CD có dung lượng lớn. Dữ liệu và checkpoint không nằm trong repo; phiên Kaggle nháp đã khởi động lại trước khi lưu checkpoint ra phiên bản hoặc tải ZIP. Chỉ các metrics, log và bốn hình nhúng trong notebook còn được khôi phục.
+Pipeline giả định ảnh A/B đã căn chỉnh, có cùng kích thước, định dạng PNG, và chỉ đánh giá các patch hoàn chỉnh. Mã chưa tải dữ liệu tự động vì bản LEVIR-CD có dung lượng lớn. Dữ liệu và checkpoint không nằm trong Git thường; checkpoint lần 2 có trong ZIP tải từ Kaggle và đã được kiểm tra tải bằng PyTorch. Lần 1 chỉ khôi phục được metrics, log và bốn hình nhúng trong notebook.

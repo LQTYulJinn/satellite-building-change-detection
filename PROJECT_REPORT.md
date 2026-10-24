@@ -51,15 +51,18 @@ Gọi TP là pixel thay đổi dự đoán đúng; FP là pixel bị báo thay �
 
 ## 6. Kết quả
 
-Kết quả dưới đây là từ notebook Kaggle của project, chạy early-fusion U-Net 30 epoch trên LEVIR-CD và chọn ngưỡng trên validation. Output đã được khôi phục từ file notebook tải xuống sau khi phiên nháp khởi động lại. File gốc `best.pt` và toàn bộ `per_tile.csv` không còn; xem dữ liệu khôi phục trong [`recovered_results/`](recovered_results/). Không dùng số từ bài báo của người khác.
+Kết quả dưới đây là từ hai lần chạy notebook Kaggle của project, mỗi lần 30 epoch với cùng cấu hình chính. Lần 1 được khôi phục từ output notebook; lần 2 có ZIP đầy đủ và checkpoint `best.pt` đã được kiểm tra tải bằng PyTorch. Các số được lưu trong [`recovered_results/`](recovered_results/) và [`results/early_run_2/`](results/early_run_2/). Không dùng số từ bài báo của người khác.
 
 | Phương pháp | IoU test | F1 test | Precision | Recall | Thời gian huấn luyện |
 |---|---:|---:|---:|---:|---:|
 | RGB difference | 0,0700 | 0,1308 | 0,1040 | 0,1760 | không huấn luyện |
-| Early fusion U-Net | 0,5834 | 0,7369 | 0,7454 | 0,7286 | 206 phút |
+| Early fusion U-Net, lần 1 | 0,5834 | 0,7369 | 0,7454 | 0,7286 | 206 phút |
+| Early fusion U-Net, lần 2 | 0,5951 | 0,7461 | 0,7784 | 0,7164 | 206 phút |
 | Siamese U-Net | chưa chạy | chưa chạy | chưa chạy | chưa chạy | chưa chạy |
 
-Checkpoint tốt nhất của early-fusion được chọn ở epoch 27. Ngưỡng 0,45 được chọn trên validation. Test có TP = 4.981.886, FP = 1.701.469, FN = 1.855.518; điểm là micro average theo pixel. Baseline RGB difference dùng ngưỡng 0,40 chọn trên validation. Dữ liệu Kaggle mirror có một số ít pixel nhãn xám trung gian; `audit_data.py` ghi nhận số lượng và `data.py` nhị phân hóa ở ngưỡng 127.
+Lần 2 chọn checkpoint tốt nhất ở epoch 29 và ngưỡng 0,30 trên validation. Test có TP = 4.898.411, FP = 1.394.414, FN = 1.938.993; điểm là micro average theo pixel. Lần 1 chọn epoch 27 và ngưỡng 0,45. Baseline RGB difference dùng ngưỡng 0,40 chọn trên validation. Dữ liệu Kaggle mirror có một số ít pixel nhãn xám trung gian; `audit_data.py` ghi nhận số lượng và `data.py` nhị phân hóa ở ngưỡng 127. Hai lần early-fusion cùng cấu hình chính nên chênh lệch điểm có thể do tính không tất định của quá trình huấn luyện, không chứng minh phương pháp mới tốt hơn. Test đã được xem sau hai lần chạy; các so sánh tiếp theo trên cùng test cần ghi là thăm dò.
+
+Phân tích `per_tile.csv` lần 2: 1.113/2.048 tile test không có pixel thay đổi; chúng tạo 120.448/1.394.414 FP (8,6%). Ví dụ nhiều FN và FP nằm trong [`results/early_run_2/examples/`](results/early_run_2/examples/). Kế hoạch cải thiện có thứ tự và giả thuyết kiểm chứng tại [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md).
 
 ## 7. Giới hạn và đạo đức sử dụng
 
@@ -74,9 +77,9 @@ Checkpoint tốt nhất của early-fusion được chọn ở epoch 27. Ngưỡ
 
 Bullet CV phù hợp với kết quả đã chạy:
 
-> Built an early-fusion U-Net for LEVIR-CD building change detection; achieved **0.737 test F1** and **0.583 test IoU** versus a **0.131 F1** RGB-difference baseline, using validation-only threshold selection and pixel-level error analysis.
+> Built and evaluated an early-fusion U-Net for LEVIR-CD building change detection, reaching **0.746 test F1** and **0.595 test IoU** with a saved checkpoint; compared against a **0.131 F1** RGB-difference baseline and analyzed pixel-level errors.
 
-Không ghi đã so sánh Siamese U-Net khi thí nghiệm đó chưa chạy. Checkpoint cần được lưu lại nếu muốn demo inference hoặc tái lập đúng trọng số mô hình đã báo cáo.
+Không ghi đã so sánh Siamese U-Net khi thí nghiệm đó chưa chạy. Checkpoint lần 2 có trong ZIP gốc tải từ Kaggle và ở `runs/early/best.pt` trong workspace hiện tại; file này không được đưa vào Git thường.
 
 > Developing a LEVIR-CD building change detection benchmark with paired-image U-Nets, split-leakage checks, IoU/F1 evaluation, and visual false-positive/false-negative analysis.
 

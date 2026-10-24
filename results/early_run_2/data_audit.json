@@ -1,0 +1,23 @@
+{
+  "train": {
+    "images": 445,
+    "pixels": 466616320,
+    "changed_pixels": 21412971,
+    "intermediate_gray_pixels": 630,
+    "change_prevalence": 0.045889888720565965
+  },
+  "val": {
+    "images": 64,
+    "pixels": 67108864,
+    "changed_pixels": 2816268,
+    "intermediate_gray_pixels": 10,
+    "change_prevalence": 0.04196566343307495
+  },
+  "test": {
+    "images": 128,
+    "pixels": 134217728,
+    "changed_pixels": 6837404,
+    "intermediate_gray_pixels": 69,
+    "change_prevalence": 0.05094262957572937
+  }
+}
