@@ -2,6 +2,18 @@
 
 Tài liệu này dành cho việc tạo kết quả trên **LEVIR-CD thật**. Không dùng kết quả của `smoke_test.py` trong CV.
 
+## Gửi qua Kaggle API
+
+Thư mục [`kaggle_kernel/`](kaggle_kernel/) chứa script và metadata để gửi một phiên chạy GPU bằng Kaggle CLI. Sau khi tự đăng nhập với `kaggle auth login`, chạy từ thư mục gốc project:
+
+```powershell
+kaggle kernels push -p kaggle_kernel --accelerator NvidiaTeslaT4
+kaggle kernels status yuljinn/levir-cd-u-net-building-change-detection
+kaggle kernels logs yuljinn/levir-cd-u-net-building-change-detection
+```
+
+Kaggle kernel ở chế độ private, gắn bản sao LEVIR-CD trên Kaggle và chạy đúng commit GitHub được ghi trong `kaggle_kernel/run.py`. Chỉ chia sẻ notebook hoặc điểm số sau khi đã kiểm tra đầu ra thật.
+
 ## Chuẩn bị notebook
 
 1. Tạo Kaggle Notebook, bật **GPU** trong phần Accelerator và bật Internet cho bước tải mã.

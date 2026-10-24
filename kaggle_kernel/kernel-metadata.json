@@ -1,0 +1,16 @@
+{
+  "id": "yuljinn/levir-cd-u-net-building-change-detection",
+  "title": "LEVIR-CD U-Net Building Change Detection",
+  "code_file": "run.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["mdrifaturrahman33/levir-cd"],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
