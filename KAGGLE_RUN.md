@@ -4,6 +4,8 @@ Tài liệu này dành cho việc tạo kết quả trên **LEVIR-CD thật**. K
 
 Nếu muốn tự chạy từng cell, tải [`notebooks/LEVIR_CD_Kaggle.ipynb`](notebooks/LEVIR_CD_Kaggle.ipynb) lên Kaggle bằng **New Notebook → File → Import Notebook**, thêm input LEVIR-CD, bật GPU và Internet, rồi chạy từ trên xuống. Notebook xuất `levir_cd_results.zip` gồm số liệu, checkpoint và hình so sánh.
 
+Để xem đồ thị loss/F1 sau từng epoch, dùng [`notebooks/LEVIR_CD_Visual_Train.ipynb`](notebooks/LEVIR_CD_Visual_Train.ipynb). Trước khi train, chọn **Session options → Persistence → Files only**. Sau khi train và đánh giá xong, chạy cell xuất ZIP và tải ngay qua liên kết trong output; tạo **Quick Save** với tùy chọn lưu output files để giữ checkpoint trên Kaggle. Quick Save lấy trạng thái đang có, còn Save & Run All sẽ chạy lại toàn bộ notebook trong phiên sạch. Persistence là biện pháp dự phòng và không bảo đảm không mất dữ liệu khi phiên lỗi.
+
 ## Gửi qua Kaggle API
 
 Thư mục [`kaggle_kernel/`](kaggle_kernel/) chứa script và metadata để gửi một phiên chạy GPU bằng Kaggle CLI. Sau khi tự đăng nhập với `kaggle auth login`, chạy từ thư mục gốc project:
