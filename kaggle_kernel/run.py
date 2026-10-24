@@ -9,7 +9,7 @@ import torch
 
 
 REPOSITORY = "https://github.com/LQTYulJinn/satellite-building-change-detection.git"
-REVISION = "f804aee"
+REVISION = "2b4920d"
 PROJECT = Path("/kaggle/working/satellite-building-change-detection")
 INPUT_ROOT = Path("/kaggle/input")
 

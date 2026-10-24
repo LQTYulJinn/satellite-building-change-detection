@@ -29,8 +29,12 @@ Kaggle kernel ở chế độ private, gắn bản sao LEVIR-CD trên Kaggle và
 from pathlib import Path
 import torch
 
-DATA = Path('/kaggle/input/levir-cd/LEVIR CD')
-assert DATA.is_dir(), f'Không thấy dữ liệu ở {DATA}; kiểm tra đường dẫn trong /kaggle/input'
+matches = [p.parent for p in Path('/kaggle/input').rglob('train')
+           if p.is_dir() and (p / 'A').is_dir()
+           and (p.parent / 'val' / 'A').is_dir()
+           and (p.parent / 'test' / 'A').is_dir()]
+assert len(matches) == 1, f'Không tìm thấy đúng một bộ LEVIR-CD: {matches}'
+DATA = matches[0]
 assert torch.cuda.is_available(), 'Notebook chưa bật GPU'
 print('GPU:', torch.cuda.get_device_name(0))
 print('Data:', DATA)
