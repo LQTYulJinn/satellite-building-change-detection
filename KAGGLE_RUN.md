@@ -2,6 +2,8 @@
 
 Tài liệu này dành cho việc tạo kết quả trên **LEVIR-CD thật**. Không dùng kết quả của `smoke_test.py` trong CV.
 
+Nếu muốn tự chạy từng cell, tải [`notebooks/LEVIR_CD_Kaggle.ipynb`](notebooks/LEVIR_CD_Kaggle.ipynb) lên Kaggle bằng **New Notebook → File → Import Notebook**, thêm input LEVIR-CD, bật GPU và Internet, rồi chạy từ trên xuống. Notebook xuất `levir_cd_results.zip` gồm số liệu, checkpoint và hình so sánh.
+
 ## Gửi qua Kaggle API
 
 Thư mục [`kaggle_kernel/`](kaggle_kernel/) chứa script và metadata để gửi một phiên chạy GPU bằng Kaggle CLI. Sau khi tự đăng nhập với `kaggle auth login`, chạy từ thư mục gốc project:
