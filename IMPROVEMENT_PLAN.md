@@ -11,16 +11,24 @@ Hai lần chạy early-fusion U-Net dùng cùng cấu hình 30 epoch, seed 42 v�
 - Trong 2.048 tile test, 1.113 tile không có pixel thay đổi. Chúng tạo 120.448 FP, khoảng **8,6% tổng FP**; phần lớn FP nằm trên tile có thay đổi thật. Vì vậy lấy mẫu thêm tile dương không phải giải pháp hiển nhiên cho FP.
 - [`test_82_512_512.png`](results/early_run_2/examples/test_82_512_512.png) cho thấy các công trình lớn bị bỏ sót; [`test_103_768_768.png`](results/early_run_2/examples/test_103_768_768.png) cho thấy thay đổi màu mái nhà bị báo sai. Đây là mô tả hình ảnh, chưa xác nhận nguyên nhân.
 
-## Thứ tự thí nghiệm đề xuất
+## Nghiên cứu ưu tiên IoU và recall của early-fusion U-Net
 
-| Bước | Chỉ thay đổi | Giả thuyết và phép kiểm tra |
-|---|---|---|
-| 1 | Giảm learning rate từ checkpoint đã lưu, thí dụ 0,0001 trong 10 epoch mới | Xem validation F1 có ổn định và tăng so với 0,7465 tại ngưỡng chọn trên validation hay không. Đây là *fine-tuning* mới, không phải resume chính xác vì checkpoint không chứa trạng thái optimizer. |
-| 2 | Thử scheduler giảm learning rate cho một run mới từ đầu | So sánh với một run từ đầu cùng số epoch, kiến trúc, dữ liệu và seed. Không đồng thời đổi augmentation/loss. |
-| 3 | Thêm augmentation đổi A/B và biến đổi ánh sáng có kiểm soát **chỉ trên train** | Vì nhãn chỉ biểu thị có/không thay đổi, đổi thứ tự thời điểm giữ nguyên nhãn. Kiểm tra F1, precision/recall và ví dụ thay đổi màu mái. |
-| 4 | Thử encoder pretrained trong một kiến trúc mới, ví dụ Siamese ResNet18 | So sánh cả độ chính xác, số tham số và thời gian. Ghi rõ trọng số pretrained và nguồn; không tuyên bố cải thiện của U-Net cũ. |
+Mốc test hiện tại: IoU **0,5951**, F1 **0,7461**, precision **0,7784**, recall **0,7164**, tại ngưỡng 0,30 được chọn trên validation. Audit cho thấy pixel thay đổi chỉ chiếm **4,59% train**, **4,20% validation** và **5,09% test**. Trong 935 tile test có thay đổi, **206 tile có TP = 0**; chúng gây ra 12,3% tổng FN. Các con số này cho thấy mất cân bằng lớp và bỏ sót đối tượng là hai giả thuyết đáng kiểm tra. Đây là **suy luận từ kết quả**, chưa phải chẩn đoán nguyên nhân.
 
-Chạy thử tốc độ riêng bằng `pin_memory`, `persistent_workers`, số worker và AMP; đo thời gian/epoch và đảm bảo metrics không bị lỗi. Các tối ưu tốc độ **không được tính là cải thiện IoU/F1** nếu chưa đo lại. Những file `dataset (1).py`, `model.py`, `train (1).py` đang ở thư mục gốc là bản thử chưa kiểm chứng; chúng không được đưa vào pipeline chính hay dùng để tuyên bố tốc độ/điểm số. Đặc biệt phải kiểm tra logic split để test không bị dùng làm validation.
+| Ưu tiên | Thí nghiệm trên mô hình cũ | Vì sao thử | Tiêu chí quyết định trên validation |
+|---|---|---|---|
+| 1 | Quét ngưỡng 0,10–0,50 trên checkpoint hiện tại; lưu bảng precision/recall/IoU/F1 và chọn điểm vận hành trước khi xem test | Không phải train lại; kiểm tra liệu có thể lấy recall cao hơn với mức giảm precision chấp nhận được | Chọn IoU cao nhất hoặc recall >= mục tiêu với IoU tối thiểu đã định. Ngưỡng 0,30 vốn tối ưu F1 validation trong lưới cũ; vì F1 và IoU đơn điệu tương ứng, không kỳ vọng tăng IoU validation chỉ nhờ đổi ngưỡng. |
+| 2 | Fine-tune `best.pt` thêm 5–10 epoch với LR 1e-4 rồi 3e-5; hoặc run mới với `ReduceLROnPlateau` | LR cố định 1e-3 và F1 validation dao động lớn ở cuối run | IoU validation và recall cùng tăng, precision không sụt quá mức. Checkpoint cũ thiếu optimizer state: gọi là fine-tune, không phải resume chính xác. |
+| 3 | Thử `BCEWithLogitsLoss(pos_weight=2 hoặc 3) + Dice`, giữ mọi thứ khác cố định | Đặt trọng số cao hơn cho pixel dương để phạt FN; tỷ lệ dương train chỉ 4,59% | So với BCE+Dice gốc, đo TP/FP/FN, IoU và recall sau khi mỗi run được chọn ngưỡng trên validation. Không lấy 20,8 (tỷ số âm/dương) làm mặc định vì có thể tăng FP quá mạnh. |
+| 4 | Thử `BCE + Tversky` với trọng số FN cao hơn FP, ví dụ mẫu số `TP + 0,3 FP + 0,7 FN` | Cho phép điều chỉnh trực tiếp thiên hướng bỏ sót | Tăng IoU cùng recall trên validation; so với bước 3 để tránh đổi nhiều yếu tố một lúc. |
+| 5 | Lấy mẫu train nhiều hơn các tile có thay đổi nhỏ, tối đa khoảng 2 lần; giữ validation/test nguyên | 206 tile dương có TP=0 và median 541 pixel dương, so với median 7.753 ở tile dương có TP>0 | Recall trên nhóm đối tượng nhỏ tăng mà IoU toàn bộ không giảm. Tính nhóm kích thước từ nhãn validation, không chọn theo test. |
+| 6 | Bổ sung train-only temporal swap A/B và biến đổi ánh sáng nhẹ, độc lập từng thời điểm | Nhãn LEVIR-CD bao gồm cả công trình xuất hiện và biến mất; A/B swap giữ nhãn nhị phân. Nhiễu ánh sáng giúp kiểm tra FP do khác biệt màu | IoU, recall, precision validation và ảnh lỗi. Chỉ một thay đổi mỗi run; không dùng biến đổi làm lệch vị trí riêng từng ảnh. |
+
+Khi báo cáo, giữ cùng split, epoch budget, batch, seed và cách chọn ngưỡng; chạy ít nhất vài seed cho phương án thắng. IoU và F1 là hai phép biến đổi đơn điệu của cùng TP/FP/FN (`F1 = 2 IoU / (1 + IoU)`), nên không coi chúng là hai tín hiệu độc lập. Để đưa IoU từ 0,595 lên khoảng 0,65 **nếu precision giữ được quanh 0,778**, recall cần lên khoảng **0,80**; đây chỉ là mục tiêu toán học, chưa phải dự báo hiệu quả thí nghiệm. Test hiện đã được xem nhiều lần, vì vậy dùng validation để chọn phương án và ghi rõ test kế tiếp là exploratory.
+
+Nguồn phương pháp: [PyTorch `BCEWithLogitsLoss` và `pos_weight`](https://docs.pytorch.org/docs/stable/generated/torch.nn.BCEWithLogitsLoss.html), [PyTorch `ReduceLROnPlateau`](https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html), [bài báo Tversky loss](https://arxiv.org/abs/1706.05721), [mô tả LEVIR-CD của tác giả](https://github.com/justchenhao/LEVIR), [đường cong precision–recall trong scikit-learn](https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html).
+
+Chạy thử tốc độ riêng bằng `pin_memory`, `persistent_workers`, số worker và AMP; đo thời gian/epoch và đảm bảo metrics không bị lỗi. Các tối ưu tốc độ **không được tính là cải thiện IoU/F1** nếu chưa đo lại. Những file `dataset (1).py`, `model.py`, `train (1).py` ở thư mục gốc thuộc thử nghiệm ResNet34 riêng, chưa được đưa vào pipeline early-fusion U-Net chính. Thử nghiệm này có kết quả validation trong checkpoint nhưng chưa có kết quả test; không trộn các số đó vào bảng trên. Đặc biệt phải kiểm tra logic split để test không bị dùng làm validation.
 
 ## Quy tắc đánh giá
 
