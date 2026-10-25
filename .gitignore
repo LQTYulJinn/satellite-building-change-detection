@@ -1,5 +1,6 @@
 data/
 runs/
+checkpoints/test/
 .venv/
 .uv-cache/
 __pycache__/

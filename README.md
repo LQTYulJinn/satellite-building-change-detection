@@ -8,7 +8,7 @@ Project dùng **LEVIR-CD** để tìm vùng công trình thay đổi giữa ản
 
 Đầu ra là mask nhị phân. Báo cáo IoU, F1, precision và recall của lớp **thay đổi**, cộng hình trước/sau/nhãn/dự đoán/lỗi.
 
-Đọc [PROJECT_REPORT.md](PROJECT_REPORT.md) để xem câu hỏi nghiên cứu, lý do chọn dữ liệu/mô hình/loss, công thức và ý nghĩa các độ đo, thiết kế thí nghiệm, giới hạn và cách mô tả trung thực trên CV. **Trạng thái:** early-fusion U-Net đã chạy hai lần 30 epoch trên Kaggle GPU. Lần 2 có kết quả test thật, `per_tile.csv`, hình so sánh và checkpoint trong ZIP mà người dùng đã tải về. Metadata và hình lần 2 nằm trong [`results/early_run_2/`](results/early_run_2/); [lần 1](recovered_results/) được giữ để đối chiếu. Xem [kế hoạch cải thiện](IMPROVEMENT_PLAN.md).
+Đọc [PROJECT_REPORT.md](PROJECT_REPORT.md) để xem câu hỏi nghiên cứu, lý do chọn dữ liệu/mô hình/loss, công thức và ý nghĩa các độ đo, thiết kế thí nghiệm, giới hạn và cách mô tả trung thực trên CV. **Trạng thái:** early-fusion U-Net đã chạy hai lần 30 epoch trên Kaggle GPU. Lần 2 có kết quả test thật, `per_tile.csv`, hình so sánh và [checkpoint đã train](checkpoints/early_fusion_unet_best.pt). Metadata và hình lần 2 nằm trong [`results/early_run_2/`](results/early_run_2/); [lần 1](recovered_results/) được giữ để đối chiếu. Xem [kế hoạch cải thiện](IMPROVEMENT_PLAN.md).
 
 Nếu máy không có GPU, xem [KAGGLE_RUN.md](KAGGLE_RUN.md) để chạy thí nghiệm trên Kaggle. Project hiện dùng **ảnh RGB hai thời điểm**, chưa xử lý Sentinel/Landsat đa phổ hoặc georeferencing; các năng lực đó không nên ghi vào CV cho project này.
 
@@ -64,6 +64,14 @@ python train.py --data data/LEVIR-CD --architecture early --run runs/early --epo
 python evaluate.py --data data/LEVIR-CD --checkpoint runs/early/best.pt --split test
 ```
 
+Để đánh giá **checkpoint đã train trong repository** mà không huấn luyện lại, dùng:
+
+```powershell
+python evaluate.py --data data/LEVIR-CD --checkpoint checkpoints/early_fusion_unet_best.pt --split test
+```
+
+Lệnh chọn ngưỡng trên validation rồi đánh giá test. Kết quả mới sẽ được ghi ở `checkpoints/test/`; kết quả test gốc của checkpoint này nằm trong [`results/early_run_2/metrics.json`](results/early_run_2/metrics.json). SHA-256 của checkpoint: `d5c6ed046a60f4699b14e817c71186b80c2d3f92fba0f8d94d37f17c6d137199`.
+
 Nếu muốn so sánh hai mô hình:
 
 ```powershell
@@ -85,6 +93,12 @@ python summarize.py
 
 Xem [hình so sánh lần 2](results/early_run_2/examples/test_82_512_512.png) và các hình còn lại trong `results/early_run_2/examples/`. Trong hình lỗi: xanh lá = dự đoán đúng vùng thay đổi, đỏ = báo thay đổi sai, xanh dương = bỏ sót. Ngưỡng được chọn trên validation, không chọn trên test. Hai lần dùng cùng cấu hình chính; chênh lệch điểm **không phải bằng chứng về một cải tiến mô hình**. Số chi tiết nằm trong [`metrics.json`](results/early_run_2/metrics.json) và [`per_tile.csv`](results/early_run_2/per_tile.csv).
 
+### Thử nghiệm ResNet34 mới: mới có validation
+
+Notebook và checkpoint ResNet34 hiện chỉ có ở máy cục bộ, chưa nằm trong repository. Chúng ghi nhận Siamese ResNet34 (encoder ImageNet, CBAM, deep supervision) đạt **IoU validation 0.8330, F1 validation 0.9089** ở epoch 30, ngưỡng 0.5. Checkpoint early fusion ResNet34 ghi **IoU validation 0.7821, F1 validation 0.8777** ở epoch 15; notebook không có log huấn luyện đầy đủ cho run này. Đây là hai kiến trúc và quy trình huấn luyện khác baseline U-Net ở bảng trên, nên chưa thể quy mức tăng cho riêng attention, pretrained encoder hay một thay đổi cụ thể. Cả hai checkpoint **chưa có kết quả test** và chưa có hình dự đoán test. Không dùng các số validation này làm kết quả test hoặc kết luận cuối cùng trên CV.
+
+Bước kế tiếp: tải đúng checkpoint tốt nhất, đánh giá một lần trên 2.048 patch test bằng cùng cách cộng TP/FP/FN theo pixel; báo precision, recall, F1, IoU và xuất ảnh A/B/nhãn/dự đoán/lỗi. Giữ ngưỡng 0.5 đã dùng trong validation hoặc chọn ngưỡng trên validation trước khi mở test; ghi rõ lựa chọn. Để so sánh nguyên nhân cải thiện, chạy ablation cùng split/seed/budget, lần lượt thay pretrained encoder, CBAM, deep supervision và augmentation.
+
 ## Giới hạn hiện tại
 
-Pipeline giả định ảnh A/B đã căn chỉnh, có cùng kích thước, định dạng PNG, và chỉ đánh giá các patch hoàn chỉnh. Mã chưa tải dữ liệu tự động vì bản LEVIR-CD có dung lượng lớn. Dữ liệu và checkpoint không nằm trong Git thường; checkpoint lần 2 có trong ZIP tải từ Kaggle và đã được kiểm tra tải bằng PyTorch. Lần 1 chỉ khôi phục được metrics, log và bốn hình nhúng trong notebook.
+Pipeline giả định ảnh A/B đã căn chỉnh, có cùng kích thước, định dạng PNG, và chỉ đánh giá các patch hoàn chỉnh. Mã chưa tải dữ liệu tự động vì bản LEVIR-CD có dung lượng lớn. Dữ liệu không nằm trong Git; checkpoint U-Net lần 2 đã được kiểm tra tải bằng PyTorch và được lưu ở `checkpoints/`. Lần 1 chỉ khôi phục được metrics, log và bốn hình nhúng trong notebook.
